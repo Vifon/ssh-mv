@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+import os.path
+import shlex
+import subprocess
+
+LOCAL_ROOT = "/media/NAS"
+REMOTE_ROOT = "/share/MD0_DATA"
+REMOTE_HOST = "example.com"
+
+
+class InvalidFileException(Exception):
+    pass
+
+
+def deprefix(path):
+    root = os.path.join(LOCAL_ROOT, "")
+    if path.startswith(root):
+        return path[len(root):]
+    else:
+        raise InvalidFileException('"{}" not in "{}"'.format(path, root))
+
+
+def main(argv=None):
+    files = argv[1:]
+    for n, path in enumerate(files):
+        path = os.path.join(
+            REMOTE_ROOT,
+            deprefix(
+                os.path.abspath(path)
+            )
+        )
+        files[n] = path
+    for x in files:
+        print(x)
+    subprocess.check_call([
+        "ssh", "--", REMOTE_HOST,
+        "mv", "--", *[shlex.quote(x) for x in files],
+    ])
+
+
+if __name__ == '__main__':
+    from sys import argv
+    main(argv)
