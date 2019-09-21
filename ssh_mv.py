@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+__author__ = "Wojciech Siewierski"
+__version__ = "1.0.0"
+__license__ = "GPL3"
+
 import argparse
 import os.path
 import shlex
