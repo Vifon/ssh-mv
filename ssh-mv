@@ -32,13 +32,11 @@ def main(argv=None):
         '-n', '--dry-run', action='store_true',
         help="Do not actually move the files.  Makes sense only with --verbose!",
     )
-    parser.add_argument(
-        'files', nargs='*',
-        help="The positional arguments to pass to the remote mv(1)."
-    )
+    parser.add_argument('source_paths', nargs='+')
+    parser.add_argument('target_path')
     args = parser.parse_args()
 
-    files = args.files
+    files = args.source_paths + [args.target_path]
     for n, path in enumerate(files):
         path = os.path.join(
             REMOTE_ROOT,
