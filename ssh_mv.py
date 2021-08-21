@@ -61,15 +61,23 @@ def main(argv=None):
         )
         files[n] = path
 
-    ssh = paramiko.SSHClient()
-    ssh.load_system_host_keys()
-    ssh.connect(**config["remote"]["connection"])
+    _ssh = None
+
+    def ssh():
+        nonlocal _ssh
+        if _ssh:
+            return _ssh
+        else:
+            _ssh = paramiko.SSHClient()
+            _ssh.load_system_host_keys()
+            _ssh.connect(**config["remote"]["connection"])
+            return _ssh
 
     if args.verbose == 1:
         for x in files:
             print(x)
     elif args.verbose == 2:
-        stdin, stdout, stderr = ssh.exec_command(r"printf '<%s>\n' {}".format(
+        stdin, stdout, stderr = ssh().exec_command(r"printf '<%s>\n' {}".format(
             " ".join(shlex.quote(x) for x in files)
         ))
         stdout.channel.set_combine_stderr(True)
@@ -77,7 +85,7 @@ def main(argv=None):
         stdout.channel.recv_exit_status()
 
     if not args.dry_run:
-        ssh.exec_command(r"mv -- {}".format(
+        ssh().exec_command(r"mv -- {}".format(
             " ".join(shlex.quote(x) for x in files)
         ))
         stdout.channel.set_combine_stderr(True)
