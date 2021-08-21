@@ -14,8 +14,5 @@ stdenv.mkDerivation rec {
   ];
 
   dontUnpack = true;
-  preFixup = ''
-    substituteInPlace $out/bin/ssh-mv --replace config.yml ${./config.yml}
-  '';
   installPhase = "install -m755 -D $src $out/bin/ssh-mv";
 }

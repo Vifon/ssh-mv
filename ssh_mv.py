@@ -4,6 +4,7 @@ __author__ = "Wojciech Siewierski"
 __version__ = "1.0.0"
 __license__ = "GPL3"
 
+from os import environ
 import argparse
 import os.path
 import shlex
@@ -38,7 +39,15 @@ def main(argv=None):
     parser.add_argument('target_path')
     args = parser.parse_args()
 
-    with open("config.yml", 'r') as fh:
+    config_path = os.path.join(
+        environ.get(
+            "XDG_CONFIG_HOME",
+            os.path.join(environ["HOME"], ".config")
+        ),
+        "ssh-mv.yml",
+    )
+
+    with open(config_path, 'r') as fh:
         config = yaml.safe_load(fh)
 
     files = args.source_paths + [args.target_path]
