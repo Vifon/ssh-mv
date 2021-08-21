@@ -7,7 +7,8 @@ __license__ = "GPL3"
 import argparse
 import os.path
 import shlex
-import subprocess
+
+import paramiko
 
 LOCAL_ROOT = "/media/NAS"
 REMOTE_ROOT = "/share/MD0_DATA"
@@ -49,20 +50,29 @@ def main(argv=None):
             )
         )
         files[n] = path
+
+    ssh = paramiko.SSHClient()
+    ssh.load_system_host_keys()
+    ssh.connect(REMOTE_HOST)
+
     if args.verbose == 1:
         for x in files:
             print(x)
     elif args.verbose == 2:
-        subprocess.check_call([
-            "ssh", "--", REMOTE_HOST,
-            "printf", shlex.quote("<%s>\\n"), *[shlex.quote(x) for x in files],
-        ])
+        stdin, stdout, stderr = ssh.exec_command(r"printf '<%s>\n' {}".format(
+            " ".join(shlex.quote(x) for x in files)
+        ))
+        stdout.channel.set_combine_stderr(True)
+        print(stdout.read().decode(), end='')
+        stdout.channel.recv_exit_status()
 
     if not args.dry_run:
-        subprocess.check_call([
-            "ssh", "--", REMOTE_HOST,
-            "mv", "--", *[shlex.quote(x) for x in files],
-        ])
+        ssh.exec_command(r"mv -- {}".format(
+            " ".join(shlex.quote(x) for x in files)
+        ))
+        stdout.channel.set_combine_stderr(True)
+        stdout.read()
+        stdout.channel.recv_exit_status()
 
 
 if __name__ == '__main__':
