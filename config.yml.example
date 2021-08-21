@@ -1,0 +1,7 @@
+local:
+  root: /media/NAS
+remote:
+  root: /share/MD0_DATA
+  connection:                  # args for paramiko.SSHClient.connect()
+    username: root
+    hostname: example.com

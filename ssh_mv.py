@@ -9,18 +9,15 @@ import os.path
 import shlex
 
 import paramiko
-
-LOCAL_ROOT = "/media/NAS"
-REMOTE_ROOT = "/share/MD0_DATA"
-REMOTE_HOST = "example.com"
+import yaml
 
 
 class InvalidFileException(Exception):
     pass
 
 
-def deprefix(path):
-    root = os.path.join(LOCAL_ROOT, "")
+def deprefix(path, root):
+    root = os.path.join(root, "")
     if path.startswith(root):
         return path[len(root):]
     else:
@@ -41,19 +38,23 @@ def main(argv=None):
     parser.add_argument('target_path')
     args = parser.parse_args()
 
+    with open("config.yml", 'r') as fh:
+        config = yaml.safe_load(fh)
+
     files = args.source_paths + [args.target_path]
     for n, path in enumerate(files):
         path = os.path.join(
-            REMOTE_ROOT,
+            config["remote"]["root"],
             deprefix(
-                os.path.abspath(path)
+                os.path.abspath(path),
+                config["local"]["root"],
             )
         )
         files[n] = path
 
     ssh = paramiko.SSHClient()
     ssh.load_system_host_keys()
-    ssh.connect(REMOTE_HOST)
+    ssh.connect(**config["remote"]["connection"])
 
     if args.verbose == 1:
         for x in files:

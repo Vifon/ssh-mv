@@ -9,6 +9,7 @@ stdenv.mkDerivation rec {
   buildInputs = [
     (python3.withPackages (pyPkgs: with pyPkgs; [
       paramiko
+      pyyaml
     ]))
   ];
 
