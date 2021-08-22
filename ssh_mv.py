@@ -85,7 +85,7 @@ def main(argv=None):
         stdout.channel.recv_exit_status()
 
     if not args.dry_run:
-        ssh().exec_command(r"mv -- {}".format(
+        stdin, stdout, stderr = ssh().exec_command(r"mv -- {}".format(
             " ".join(shlex.quote(x) for x in files)
         ))
         stdout.channel.set_combine_stderr(True)
