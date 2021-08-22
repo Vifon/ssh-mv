@@ -92,6 +92,9 @@ def main(argv=None):
         stdout.read()
         stdout.channel.recv_exit_status()
 
+    if _ssh:
+        _ssh.close()
+
 
 if __name__ == '__main__':
     from sys import argv
